@@ -44,7 +44,7 @@ def show_books():
 
     number = 1
     for book in books:
-        print(str(number) + ". " + book[0] + " — " + book[1] + " (" + str(book[2]) + " год.)")
+        print(str(number) + ". " + book[0] + " - " + book[1] + " (" + str(book[2]) + " год.)")
         number = number + 1
 
 def find_book():
@@ -58,7 +58,7 @@ def find_book():
     number = 1
     for book in books:
         if search in book[0].lower():
-            print(str(number) + ". " + book[0] + " — " + book[1] + " (" + str(book[2]) + ")")
+            print(str(number) + ". " + book[0] + " - " + book[1] + " (" + str(book[2]) + ")")
             found = True
         number = number + 1
 
@@ -106,7 +106,47 @@ def show_statistics():
     print("Самая новая книга:", newest)
 
 def edit_book():
-    pass
+    if len(books) == 0:
+        print("Библиотека пустая")
+        return
+
+    show_books()
+    number = input("Введите номер книги: ").strip()
+
+    if not number.isdigit():
+        print("Неверный номер книги.")
+        return
+
+    number = int(number)
+
+    if number < 1 or number > len(books):
+        print("Неверный номер книги.")
+        return
+
+    book = books[number - 1]
+
+    title = input("Новое название (Enter - оставить " + book[0] + "): ").strip()
+    author = input("Новый автор (Enter - оставить " + book[1] + "): ").strip()
+    year = input("Новый год (Enter - оставить " + str(book[2]) + "): ").strip()
+
+    if title != "":
+        book[0] = title
+
+    if author != "":
+        book[1] = author
+
+    if year != "":
+        if not year.isdigit():
+            print("Год должен быть числом, год не изменён.")
+        else:
+            year = int(year)
+            current_year = 2026
+            if year < 1500 or current_year < year:
+                print("Год должен быть от 1500 до", current_year, "- год не изменён.")
+            else:
+                book[2] = year
+
+    print("Книга изменена.")
 
 def main():
     while True:
