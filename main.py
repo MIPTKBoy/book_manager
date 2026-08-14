@@ -20,11 +20,11 @@ def add_book():
     year = input("Введите год выпуска: ").strip()
 
     if title == "" or author == "":
-        print("Название и автор не могут быть пустыми.")
+        print("Название и автор не могут быть пустыми")
         return
 
     if not year.isdigit():
-        print("Год должен быть числом.")
+        print("Год должен быть числом")
         return
 
     year = int(year)
@@ -35,11 +35,11 @@ def add_book():
         return
 
     books.append([title, author, year])
-    print("Книга успешно добавлена.")
+    print("Книга успешно добавлена!")
 
 def show_books():
     if len(books) == 0:
-        print("Библиотека пуста")
+        print("Библиотека пустая")
         return
 
     number = 1
@@ -48,7 +48,22 @@ def show_books():
         number = number + 1
 
 def find_book():
-    pass
+    if len(books) == 0:
+        print("Библиотека пустая")
+        return
+
+    search = input("Введите часть названия: ").strip().lower()
+
+    found = False
+    number = 1
+    for book in books:
+        if search in book[0].lower():
+            print(str(number) + ". " + book[0] + " — " + book[1] + " (" + str(book[2]) + ")")
+            found = True
+        number = number + 1
+
+    if not found:
+        print("Книга не найдена.")
 
 def delete_book():
     pass
