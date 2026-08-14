@@ -38,7 +38,14 @@ def add_book():
     print("Книга успешно добавлена.")
 
 def show_books():
-    pass
+    if len(books) == 0:
+        print("Библиотека пуста")
+        return
+
+    number = 1
+    for book in books:
+        print(str(number) + ". " + book[0] + " — " + book[1] + " (" + str(book[2]) + " год.)")
+        number = number + 1
 
 def find_book():
     pass
