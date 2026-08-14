@@ -15,7 +15,27 @@ def show_menu():
     ''')
 
 def add_book():
-    pass
+    title = input("Введите название книги: ").strip()
+    author = input("Введите автора: ").strip()
+    year = input("Введите год выпуска: ").strip()
+
+    if title == "" or author == "":
+        print("Название и автор не могут быть пустыми.")
+        return
+
+    if not year.isdigit():
+        print("Год должен быть числом.")
+        return
+
+    year = int(year)
+    current_year = 2026
+
+    if year < 1500 or current_year < year:
+        print("Год должен быть от 1500 до", current_year)
+        return
+
+    books.append([title, author, year])
+    print("Книга успешно добавлена.")
 
 def show_books():
     pass
@@ -50,10 +70,10 @@ def main():
         elif choice == "6":
             edit_book()
         elif choice == "0":
-            print("Программа завершена.")
+            print("Book manager остановлен спасибо что воспользовались нашим библиотекой.")
             break
         else:
-            print("Неверный пункт меню.")
+            print("Вы ввели не существующего меню")
 
 
 main()
