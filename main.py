@@ -88,7 +88,22 @@ def delete_book():
     print("Книга " + book[0] + " удалена!")
 
 def show_statistics():
-    pass
+    if len(books) == 0:
+        print("Библиотека пустая")
+        return
+
+    oldest = books[0][2]
+    newest = books[0][2]
+
+    for book in books:
+        if book[2] < oldest:
+            oldest = book[2]
+        if book[2] > newest:
+            newest = book[2]
+
+    print("Всего книг:", len(books))
+    print("Самая старая книга:", oldest)
+    print("Самая новая книга:", newest)
 
 def edit_book():
     pass
