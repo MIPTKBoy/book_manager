@@ -51,9 +51,11 @@ def show_books():
         print("Библиотека пустая")
         return
 
+    books.sort()
+
     number = 1
     for book in books:
-        print(str(number) + ". " + book[0] + " - " + book[1] + " (" + str(book[2]) + " год.)")
+        print(str(number) + ". " + book[0] + " — " + book[1] + " (" + str(book[2]) + " год.)")
         number = number + 1
 
 def find_book():
