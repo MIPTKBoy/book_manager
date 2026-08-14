@@ -34,6 +34,15 @@ def add_book():
         print("Год должен быть от 1500 до", current_year)
         return
 
+    exists = False
+    for book in books:
+        if book[0].lower() == title.lower():
+            exists = True
+
+    if exists:
+        print("Книга с таким названием уже есть в библиотеке")
+        return
+
     books.append([title, author, year])
     print("Книга успешно добавлена!")
 
@@ -147,6 +156,8 @@ def edit_book():
                 book[2] = year
 
     print("Книга изменена.")
+
+
 
 def main():
     while True:
