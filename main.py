@@ -189,7 +189,21 @@ def show_modern_books():
         print("Современных книг свыше 2015 года нету")
 
 def clear_library():
-    pass
+    if len(books) == 0:
+        print("Библиотека пустая")
+        return
+
+    print("Вы собираетесь удалить все книги:", len(books))
+    print("Это действие нельзя отменить!")
+    answer = input("Напишите УДАЛИТЬ чтобы подтвердить: ").strip()
+
+    if answer != "УДАЛИТЬ":
+        print("То что вы ввели не совпадает, библиотека не тронута")
+        return
+
+    books.clear()
+    print("Библиотека была очищена полностью")
+
 
 def main():
     while True:
