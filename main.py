@@ -60,6 +60,9 @@ def show_books():
         print(str(number) + ". " + book[0] + " — " + book[1] + " (" + str(book[2]) + " год.)")
         number = number + 1
 
+
+# Если вводить автора в поиске сделать так чтобы вводилось в конце сколько книги нашлось после успешнего поиска
+
 def find_book():
     if len(books) == 0:
         print("Библиотека пустая")
@@ -179,14 +182,28 @@ def show_modern_books():
 
     found = False
     number = 1
+    year = input('Введите год: ').strip()
+    if not year.isdigit():
+        print("Год должен быть числом")
+        return
+
+    year = int(year)
+
+    if year < 1500 or year > 2026:
+        print("Неверный год книги")
+        return
+
     for book in books:
-        if book[2] > 2015:
+        if book[2] > year:
             print(str(number) + ". " + book[0] + " — " + book[1] + " (" + str(book[2]) + " год.)")
             found = True
         number = number + 1
 
     if not found:
-        print("Современных книг свыше 2015 года нету")
+        print(f"Книг свыше {year} года нету")
+
+
+
 
 def clear_library():
     if len(books) == 0:
