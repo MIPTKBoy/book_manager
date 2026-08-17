@@ -74,16 +74,18 @@ def find_book():
         print("Введите текст для поиска")
         return
 
-    found = False
+    count = 0
     number = 1
     for book in books:
         if search in book[0].lower() or search in book[1].lower():
             print(str(number) + ". " + book[0] + " - " + book[1] + " (" + str(book[2]) + ")")
-            found = True
+            count = count + 1
         number = number + 1
 
-    if not found:
+    if count == 0:
         print("Книга не найдена")
+    else:
+        print("Найдено книг:", count)
 
 def delete_book():
     if len(books) == 0:
