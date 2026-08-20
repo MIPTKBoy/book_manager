@@ -391,7 +391,55 @@ def show_statistics():
     print("Самая новая книга: ", row[2])
 
 def edit_book():
-    pass
+    rows = show_books()
+
+    if len(rows) == 0:
+        return
+
+    number = input("Введите номер книги: ").strip()
+
+    if not number.isdigit():
+        print("Номер книги должен быть числом")
+        return
+
+    number = int(number)
+
+    if number < 1 or number > len(rows):
+        print("Неверный номер книги")
+        return
+
+    book = rows[number - 1]
+
+    title = input("Новое название " + book[1] + "): ").strip()
+    author = input("Новый автор " + book[2] + "): ").strip()
+    year = input("Новый год " + str(book[3]) + "): ").strip()
+
+    if year != "":
+        if not year.isdigit():
+            print("Год должен быть числом, изменения не сохранены")
+            return
+        year = int(year)
+        current_year = 2026
+        if year < 1500 or current_year < year:
+            print("Год должен быть от 1500 до ", current_year, ", изменения не сохранены")
+            return
+
+        if title == "" and author == "" and year == "":
+            print("Ничего не изменено")
+            return
+
+        if title == "":
+            title = book[1]
+
+        if author == "":
+            author = book[2]
+
+        if year == "":
+            year = book[3]
+
+        cursor.execute("UPDATE books SET title = %s, author = %s, year = %s WHERE id = %s", (title, author, year, book[0]))
+        conn.commit()
+        print("Книга изменена")
 
 def show_modern_books():
     pass
