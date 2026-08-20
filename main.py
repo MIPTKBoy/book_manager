@@ -379,7 +379,16 @@ def delete_book():
 
 
 def show_statistics():
-    pass
+    cursor.execute("SELECT COUNT(*), MIN(year), MAX(year) FROM books")
+    row = cursor.fetchone()
+
+    if row[0] == 0:
+        print("Библиотека пустая")
+        return
+
+    print("Всего книг: ", row[0])
+    print("Самая старая книга: ", row[1])
+    print("Самая новая книга: ", row[2])
 
 def edit_book():
     pass
