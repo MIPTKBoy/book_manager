@@ -475,15 +475,30 @@ def show_modern_books():
         number += 1
 
 def clear_library():
-    pass
+    cursor.execute("SELECT COUNT(*) FROM books")
+    total = cursor.fetchone()[0]
+    if total == 0:
+        print("Библиотека пустая")
+        return
 
+    print("Вы собираетесь удалить все книги:", total)
+    print("Это действие нельзя отменить!")
+    answer = input("Напишите УДАЛИТЬ чтобы подтвердить: ").strip()
+
+    if answer != "УДАЛИТЬ":
+        print("То что вы ввели не совпадает, библиотека не тронута")
+        return
+
+    cursor.execute("DELETE FROM books")
+    conn.commit()
+    print("Библиотека была очищена полностью")
 
 
 def main():
     try:
         while True:
             show_menu()
-            choice = input("Выберите действие: ")
+            choice = input("Выберите действие: ").strip()
 
             if choice == "1":
                 add_book()
@@ -502,7 +517,7 @@ def main():
             elif choice == "8":
                 clear_library()
             elif choice == "0":
-                print("Book manager остановлен спасибо что воспользовались нашим библиотекой.")
+                print("Book manager остановлен спасибо что воспользовались нашей библиотекой.")
                 break
             else:
                 print("Вы ввели не существующего меню")
