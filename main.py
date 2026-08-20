@@ -442,7 +442,37 @@ def edit_book():
         print("Книга изменена")
 
 def show_modern_books():
-    pass
+    cursor.execute("SELECT COUNT(*) FROM books")
+    total = cursor.fetchone()[0]
+
+    if total == 0:
+        print("Библиотека пустая")
+        return
+
+    year = input("Введите год: ").strip()
+
+    if not year.isdigit():
+        print("Год должен быть числом")
+        return
+
+    year = int(year)
+
+    if year < 1500 or year > 2026:
+        print("Неверный год книги")
+        return
+
+    cursor.execute("SELECT title, author, year FROM books WHERE year > %s ORDER BY title", (year,))
+    rows = cursor.fetchall()
+
+    if len(rows) == 0:
+        print("Книг свыше " + str(year) + " года нету")
+        return
+
+    number = 1
+
+    for row in rows:
+        print(str(number) + ". " + row[0] + " - " + row[1] + " (" + str(row[2]) + " год.)")
+        number += 1
 
 def clear_library():
     pass
