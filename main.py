@@ -353,10 +353,30 @@ def find_book():
         number += 1
 
     print("Найдено книг: ", len(rows))
-    
+
 
 def delete_book():
-    pass
+    rows = show_books()
+    if len(rows) == 0:
+        return
+
+    number = input("Введите номер книги: ").strip()
+
+    if not number.isdigit():
+        print("Номер должен быть числом")
+        return
+
+    number = int(number)
+
+    if number < 1 or number > len(rows):
+        print("Неверный номер книги")
+        return
+
+    book = rows[number - 1]
+    cursor.execute("DELETE FROM books WHERE id = %s", (book[0],))
+    conn.commit()
+    print("Книга " + book[1] + " удалена!")
+
 
 def show_statistics():
     pass
