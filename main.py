@@ -1,21 +1,31 @@
-# books = []
-#
-# def show_menu():
-#     print('''
-#     ==================================
-#                 BOOK MANAGER
-#     ==================================
-#     1. Добавить книгу
-#     2. Показать все книги
-#     3. Найти книгу
-#     4. Удалить книгу
-#     5. Статистика
-#     6. Изменить книгу
-#     7. Показать только современные книги
-#     8. Очистить библиотеку
-#     0. Выход
-#     ''')
-#
+import psycopg2
+
+conn = psycopg2.connect(
+    host="localhost",
+    user="postgres",
+    password="123456",
+    port="5432",
+    dbname="book_manager"
+)
+
+cursor = conn.cursor()
+
+def show_menu():
+    print('''
+    ==================================
+                BOOK MANAGER
+    ==================================
+    1. Добавить книгу
+    2. Показать все книги
+    3. Найти книгу
+    4. Удалить книгу
+    5. Статистика
+    6. Изменить книгу
+    7. Показать только современные книги
+    8. Очистить библиотеку
+    0. Выход
+    ''')
+
 # def add_book():
 #     title = input("Введите название книги: ").strip()
 #     author = input("Введите автора: ").strip()
@@ -47,7 +57,38 @@
 #
 #     books.append([title, author, year])
 #     print("Книга успешно добавлена!")
-#
+
+def add_book():
+    title = input("Введите название книги: ").strip()
+    author = input("Введите автора: ").strip()
+    year = input("Введите год выпуска: ").strip()
+
+    if title == "" or author == "":
+        print("Название и автора не могу быть пустыми")
+        return
+
+    if not year.isdigit():
+        print("Год должен быть числом")
+        return
+
+    year = int(year)
+    curren_year = 2026
+
+    if year < 1500 or curren_year < year:
+        print("Год должен быть от 1500 до", curren_year)
+        return
+
+    cursor.execute("SELECT id FROM books WHERE LOWER(title) = LOWER(%s)", (title,))
+    found = cursor.fetchone()
+
+    if found != None:
+        print("Книга с таким названием уже есть в библиотеке")
+        return
+
+    cursor.execute("INSERT INTO books (title, author, year) VALUES (%s, %s, %s)", (title, author, year))
+    conn.commit()
+    print("Книга успешно добавлена!")
+
 # def show_books():
 #     if len(books) == 0:
 #         print("Библиотека пустая")
@@ -59,10 +100,22 @@
 #     for book in books:
 #         print(str(number) + ". " + book[0] + " — " + book[1] + " (" + str(book[2]) + " год.)")
 #         number = number + 1
-#
-#
-# # Если вводить автора в поиске сделать так чтобы вводилось в конце сколько книги нашлось после успешнего поиска
-#
+
+def show_books():
+    cursor.execute("SELECT id, title, author, year FROM books ORDER BY title, author, year")
+    rows = cursor.fetchall()
+
+    if len(rows) == 0:
+        print("Библиотека пустая")
+        return rows
+
+    number = 1
+    for row in rows:
+        print(str(number) + ". " + row[1] + " - " + row[2] + " (" + str(row[3]) + " год.)")
+        number += 1
+
+    return rows
+
 # def find_book():
 #     if len(books) == 0:
 #         print("Библиотека пустая")
@@ -86,7 +139,31 @@
 #         print("Найдено книг: 0")
 #     else:
 #         print("Найдено книг:", count)
-#
+
+def find_book():
+    cursor.execute("SELECT COUNT(*) FROM books")
+    total = cursor.fetchone()[0]
+
+    if total == 0:
+        print("Библиотека пустая")
+        return
+
+    search = input("Введите название книги или автора").strip().lower()
+
+    if search == "":
+        print("Введите текст для поиска")
+        return
+
+    cursor.execute("SELECT title, author, year FROM books WHERE LOWER(title) LIKE %s OR LOWER(author) LIKE %s ORDER BY title", ("%" + search + "%", "%" + search + "%"))
+    rows = cursor.fetchall()
+
+    number = 1
+    for row in rows:
+        print(str(number) + "." + row[0] + " - " + row[1] + " (" + str(row[2] + ")"))
+        number += 1
+
+    print("Найдено книг: ", len(rows))
+
 # def delete_book():
 #     if len(books) == 0:
 #         print("Библиотека пустая")
@@ -109,6 +186,29 @@
 #     books.pop(number - 1)
 #     print("Книга " + book[0] + " удалена!")
 #
+
+def delete_book():
+    rows = show_books()
+    if len(rows) == 0:
+        return
+
+    number = input("Введите номер книги: ").strip()
+
+    if not number.isdigit():
+        print("Номер должен быть числом")
+        return
+
+    number = int(number)
+
+    if number < 1 or number > len(rows):
+        print("Неверный номер книги")
+        return
+
+    book = rows[number - 1]
+    cursor.execute("DELETE FROM books WHERE id = %s", (book[0],))
+    conn.commit()
+    print("Книга " + book[1] + " удалена!")
+
 # def show_statistics():
 #     if len(books) == 0:
 #         print("Библиотека пустая")
@@ -127,6 +227,19 @@
 #     print("Самая старая книга:", oldest)
 #     print("Самая новая книга:", newest)
 #
+
+def show_statistics():
+    cursor.execute("SELECT COUNT(*), MIN(year), MAX(year) FROM books")
+    row = cursor.fetchone()
+
+    if row[0] == 0:
+        print("Библиотека пустая")
+        return
+
+    print("Всего книг: ", row[0])
+    print("Самая старая книга: ", row[1])
+    print("Самая новая книга: ", row[2])
+
 # def edit_book():
 #     if len(books) == 0:
 #         print("Библиотека пустая")
@@ -175,220 +288,7 @@
 #
 #     print("Книга изменена")
 #
-# def show_modern_books():
-#     if len(books) == 0:
-#         print("Библиотека пустая")
-#         return
-#
-#     books.sort()
-#
-#     found = False
-#     number = 1
-#     year = input('Введите год: ').strip()
-#     if not year.isdigit():
-#         print("Год должен быть числом")
-#         return
-#
-#     year = int(year)
-#
-#     if year < 1500 or year > 2026:
-#         print("Неверный год книги")
-#         return
-#
-#     for book in books:
-#         if book[2] > year:
-#             print(str(number) + ". " + book[0] + " — " + book[1] + " (" + str(book[2]) + " год.)")
-#             found = True
-#         number = number + 1
-#
-#     if not found:
-#         print(f"Книг свыше {year} года нету")
-#
-#
-#
-#
-# def clear_library():
-#     if len(books) == 0:
-#         print("Библиотека пустая")
-#         return
-#
-#     print("Вы собираетесь удалить все книги:", len(books))
-#     print("Это действие нельзя отменить!")
-#     answer = input("Напишите УДАЛИТЬ чтобы подтвердить: ").strip()
-#
-#     if answer != "УДАЛИТЬ":
-#         print("То что вы ввели не совпадает, библиотека не тронута")
-#         return
-#
-#     books.clear()
-#     print("Библиотека была очищена полностью")
-#
-#
-# def main():
-#     while True:
-#         show_menu()
-#         choice = input("Выберите действие: ")
-#
-#         if choice == "1":
-#             add_book()
-#         elif choice == "2":
-#             show_books()
-#         elif choice == "3":
-#             find_book()
-#         elif choice == "4":
-#             delete_book()
-#         elif choice == "5":
-#             show_statistics()
-#         elif choice == "6":
-#             edit_book()
-#         elif choice == "7":
-#             show_modern_books()
-#         elif choice == "8":
-#             clear_library()
-#         elif choice == "0":
-#             print("Book manager остановлен спасибо что воспользовались нашим библиотекой.")
-#             break
-#         else:
-#             print("Вы ввели не существующего меню")
-#
-#
-# main()
-#
 
-
-import psycopg2
-
-conn = psycopg2.connect(
-    host="localhost",
-    user="postgres",
-    password="123456",
-    port="5432",
-    dbname="book_manager"
-)
-
-cursor = conn.cursor()
-
-def show_menu():
-    print('''
-    ==================================
-                BOOK MANAGER
-    ==================================
-    1. Добавить книгу
-    2. Показать все книги
-    3. Найти книгу
-    4. Удалить книгу
-    5. Статистика
-    6. Изменить книгу
-    7. Показать только современные книги
-    8. Очистить библиотеку
-    0. Выход
-    ''')
-
-def add_book():
-    title = input("Введите название книги: ").strip()
-    author = input("Введите автора: ").strip()
-    year = input("Введите год выпуска: ").strip()
-
-    if title == "" or author == "":
-        print("Название и автора не могу быть пустыми")
-        return
-
-    if not year.isdigit():
-        print("Год должен быть числом")
-        return
-
-    year = int(year)
-    curren_year = 2026
-
-    if year < 1500 or curren_year < year:
-        print("Год должен быть от 1500 до", curren_year)
-        return
-
-    cursor.execute("SELECT id FROM books WHERE LOWER(title) = LOWER(%s)", (title,))
-    found = cursor.fetchone()
-
-    if found != None:
-        print("Книга с таким названием уже есть в библиотеке")
-        return
-
-    cursor.execute("INSERT INTO books (title, author, year) VALUES (%s, %s, %s)", (title, author, year))
-    conn.commit()
-    print("Книга успешно добавлена!")
-
-def show_books():
-    cursor.execute("SELECT id, title, author, year FROM books ORDER BY title, author, year")
-    rows = cursor.fetchall()
-
-    if len(rows) == 0:
-        print("Библиотека пустая")
-        return rows
-
-    number = 1
-    for row in rows:
-        print(str(number) + ". " + row[1] + " - " + row[2] + " (" + str(row[3]) + " год.)")
-        number += 1
-
-    return rows
-
-def find_book():
-    cursor.execute("SELECT COUNT(*) FROM books")
-    total = cursor.fetchone()[0]
-
-    if total == 0:
-        print("Библиотека пустая")
-        return
-
-    search = input("Введите название книги или автора").strip().lower()
-
-    if search == "":
-        print("Введите текст для поиска")
-        return
-
-    cursor.execute("SELECT title, author, year FROM books WHERE LOWER(title) LIKE %s OR LOWER(author) LIKE %s ORDER BY title", ("%" + search + "%", "%" + search + "%"))
-    rows = cursor.fetchall()
-
-    number = 1
-    for row in rows:
-        print(str(number) + "." + row[0] + " - " + row[1] + " (" + str(row[2] + ")"))
-        number += 1
-
-    print("Найдено книг: ", len(rows))
-
-
-def delete_book():
-    rows = show_books()
-    if len(rows) == 0:
-        return
-
-    number = input("Введите номер книги: ").strip()
-
-    if not number.isdigit():
-        print("Номер должен быть числом")
-        return
-
-    number = int(number)
-
-    if number < 1 or number > len(rows):
-        print("Неверный номер книги")
-        return
-
-    book = rows[number - 1]
-    cursor.execute("DELETE FROM books WHERE id = %s", (book[0],))
-    conn.commit()
-    print("Книга " + book[1] + " удалена!")
-
-
-def show_statistics():
-    cursor.execute("SELECT COUNT(*), MIN(year), MAX(year) FROM books")
-    row = cursor.fetchone()
-
-    if row[0] == 0:
-        print("Библиотека пустая")
-        return
-
-    print("Всего книг: ", row[0])
-    print("Самая старая книга: ", row[1])
-    print("Самая новая книга: ", row[2])
 
 def edit_book():
     rows = show_books()
@@ -441,6 +341,35 @@ def edit_book():
         conn.commit()
         print("Книга изменена")
 
+# def show_modern_books():
+#     if len(books) == 0:
+#         print("Библиотека пустая")
+#         return
+#
+#     books.sort()
+#
+#     found = False
+#     number = 1
+#     year = input('Введите год: ').strip()
+#     if not year.isdigit():
+#         print("Год должен быть числом")
+#         return
+#
+#     year = int(year)
+#
+#     if year < 1500 or year > 2026:
+#         print("Неверный год книги")
+#         return
+#
+#     for book in books:
+#         if book[2] > year:
+#             print(str(number) + ". " + book[0] + " — " + book[1] + " (" + str(book[2]) + " год.)")
+#             found = True
+#         number = number + 1
+#
+#     if not found:
+#         print(f"Книг свыше {year} года нету")
+
 def show_modern_books():
     cursor.execute("SELECT COUNT(*) FROM books")
     total = cursor.fetchone()[0]
@@ -473,6 +402,22 @@ def show_modern_books():
     for row in rows:
         print(str(number) + ". " + row[0] + " - " + row[1] + " (" + str(row[2]) + " год.)")
         number += 1
+
+# def clear_library():
+#     if len(books) == 0:
+#         print("Библиотека пустая")
+#         return
+#
+#     print("Вы собираетесь удалить все книги:", len(books))
+#     print("Это действие нельзя отменить!")
+#     answer = input("Напишите УДАЛИТЬ чтобы подтвердить: ").strip()
+#
+#     if answer != "УДАЛИТЬ":
+#         print("То что вы ввели не совпадает, библиотека не тронута")
+#         return
+#
+#     books.clear()
+#     print("Библиотека была очищена полностью")
 
 def clear_library():
     cursor.execute("SELECT COUNT(*) FROM books")
