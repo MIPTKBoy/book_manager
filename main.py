@@ -331,7 +331,29 @@ def show_books():
     return rows
 
 def find_book():
-    pass
+    cursor.execute("SELECT COUNT(*) FROM books")
+    total = cursor.fetchone()[0]
+
+    if total == 0:
+        print("Библиотека пустая")
+        return
+
+    search = input("Введите название книги или автора").strip().lower()
+
+    if search == "":
+        print("Введите текст для поиска")
+        return
+
+    cursor.execute("SELECT title, author, year FROM books WHERE LOWER(title) LIKE %s OR LOWER(author) LIKE %s ORDER BY title", ("%" + search + "%", "%" + search + "%"))
+    rows = cursor.fetchall()
+
+    number = 1
+    for row in rows:
+        print(str(number) + "." + row[0] + " - " + row[1] + " (" + str(row[2] + ")"))
+        number += 1
+
+    print("Найдено книг: ", len(rows))
+    
 
 def delete_book():
     pass
