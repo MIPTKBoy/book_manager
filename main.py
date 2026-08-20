@@ -316,7 +316,19 @@ def add_book():
     print("Книга успешно добавлена!")
 
 def show_books():
-    pass
+    cursor.execute("SELECT id, title, author, year FROM books ORDER BY title, author, year")
+    rows = cursor.fetchall()
+
+    if len(rows) == 0:
+        print("Библиотека пустая")
+        return rows
+
+    number = 1
+    for row in rows:
+        print(str(number) + ". " + row[1] + " - " + row[2] + " (" + str(row[3]) + " год.)")
+        number += 1
+
+    return rows
 
 def find_book():
     pass
